@@ -7,14 +7,7 @@ import "flatpickr/dist/flatpickr.min.css";
 // Импорт библиотеки Notify для отображения уведомлений
 import Notiflix from 'notiflix';
 
-// Дополнительный обьект параметров с ДЗ
-const options = {
-    enableTime: true,
-    time_24hr: true,
-    defaultDate: new Date(),
-    minuteIncrement: 1,
-    onClose,
-};
+
 
 // Получаем доступ к необходимым элементам.
 const refs = {
@@ -25,6 +18,15 @@ const refs = {
     minutes: document.querySelector('[data-minutes]'),
     seconds: document.querySelector('[data-seconds]'),
 }
+
+// Дополнительный обьект параметров с ДЗ
+const options = {
+    enableTime: true,
+    time_24hr: true,
+    defaultDate: new Date(),
+    minuteIncrement: 1,
+    onClose,
+}; 
 
 // Инициализируем библиотеку flatpickr
 const fp = flatpickr(refs.input, options);
@@ -47,8 +49,7 @@ function onClose(selectedDates) {
 // Создаем глобальную переменную timerId
 let timerId = null;
 
-// Добавляем слушателя на событие "клик" при нажатии на кнопки Start 
-refs.startBtn.addEventListener('click', onStartBtn);
+
 
 // Создаем колбек функцию на событие, которая начинает отсчет времени
 const onStartBtn = () => {
@@ -66,6 +67,9 @@ const onStartBtn = () => {
     }, 1000);
     
 }
+
+// Добавляем слушателя на событие "клик" при нажатии на кнопки Start 
+refs.startBtn.addEventListener('click', onStartBtn);
 
    // Добавляем разметку
     function markupChange({ days, hours, minutes, seconds }) {
