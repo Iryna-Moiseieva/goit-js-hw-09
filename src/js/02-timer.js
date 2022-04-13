@@ -97,34 +97,3 @@ function convertMs(ms) {
 function addLeadingZero(value) {
     return String(value).padStart(2, '0');
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
