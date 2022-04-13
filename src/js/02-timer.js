@@ -5,8 +5,7 @@ import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
 // Импорт библиотеки Notify для отображения уведомлений
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-
+import Notiflix from 'notiflix';
 
 // Дополнительный обьект параметров с ДЗ
 const options = {
@@ -14,91 +13,118 @@ const options = {
     time_24hr: true,
     defaultDate: new Date(),
     minuteIncrement: 1,
-    onClose(selectedDates) {
-        chooseDate(selectedDates[0]);
-    }
+    onClose,
 };
 
 // Получаем доступ к необходимым элементам.
-const buttonStart = document.querySelector("[data-start]");
-const inputEl = document.querySelector("#datetime-picker");
-const days = document.querySelector('[data-days]');
-const hours = document.querySelector('[data-hours]');
-const minutes = document.querySelector('[data-minutes]');
-const seconds = document.querySelector('[data-seconds]');
+const refs = {
+    input: document.querySelector('#datetime-picker'),
+    startBtn: document.querySelector('[data-start]'),
+    days: document.querySelector('[data-days]'),
+    hours: document.querySelector('[data-hours]'),
+    minutes: document.querySelector('[data-minutes]'),
+    seconds: document.querySelector('[data-seconds]'),
+}
+
+// Инициализируем библиотеку flatpickr
+const fp = flatpickr(refs.input, options);
 
 // Устанавливаем "блокировку" кнопки Start через атрибут тега disabled
-buttonStart.disabled = true;
-
-// Создаем глобальную переменную timerId
-let timerId = null; 
+refs.startBtn.setAttribute("disabled", "disabled");
 
 let chosenDate = Date.now();
 
-// Инициализируем библиотеку flatpickr
-const fp = flatpickr(inputEl, options); 
-
 // Функция выбора даты
-function chooseDate (date) {
-    if (Date.now() > date) {
-        Notify.failure('Please choose a date in the future');
+function onClose(selectedDates) {    
+    if (selectedDates[0] < options.defaultDate) {
+        return Notiflix.Notify.failure('Please choose a date in the future');
     } else {
-        buttonStart.disabled = false;
-        chosenDate = date;
+        refs.startBtn.removeAttribute("disabled", "disabled");
+        chosenDate = selectedDates[0];
     }
 }
 
+// Создаем глобальную переменную timerId
+let timerId = null;
+
 // Добавляем слушателя на событие "клик" при нажатии на кнопки Start 
-buttonStart.addEventListener("click", onButtonStartClick);
+refs.startBtn.addEventListener('click', onStartBtn);
 
 // Создаем колбек функцию на событие, которая начинает отсчет времени
-function onButtonStartClick() {
+const onStartBtn = () => {
+    refs.startBtn.setAttribute("disabled", "disabled");
+    refs.input.setAttribute("disabled", "disabled");
     timerId = setInterval(() => {
-    
-    const newData = new Date(); 
-    const finalData = new Date(inputEl.value);
-    const deltaData= convertMs(finalData - newData);
-
-        if (deltaData <= 0) {
-            clearInterval(timerId);
-        }
+        const resultTime = convertMs(chosenDate - Date.now());
         
-        // Добавляем разметку
-        days.textContent = addLeadingZero(deltaData.days);
-        hours.textContent = addLeadingZero(deltaData.hours);
-        minutes.textContent = addLeadingZero(deltaData.minutes);
-        seconds.textContent = addLeadingZero(deltaData.seconds);
-    
-        }, 1000);
-    
-    inputEl.disabled = true;
-    buttonStart.disabled = true;
+        const deltaTime = chosenDate - Date.now();
+        if (deltaTime <= 0 ) {
+            clearInterval(timerId);
+            return;
+    }
+        markupChange(resultTime); 
+    }, 1000);
     
 }
 
+   // Добавляем разметку
+    function markupChange({ days, hours, minutes, seconds }) {
+    refs.days.textContent = addLeadingZero(days);
+    refs.hours.textContent = addLeadingZero(hours);
+    refs.minutes.textContent = addLeadingZero(minutes);
+    refs.seconds.textContent = addLeadingZero(seconds);
+}
 
 // Для подсчета значений используем готовую функцию convertMs,
 // где ms - разница между конечной и текущей датой в миллисекундах.
-
 function convertMs(ms) {
-    // Number of milliseconds per unit of time
     const second = 1000;
     const minute = second * 60;
     const hour = minute * 60;
     const day = hour * 24;
 
-    // Remaining days
     const days = Math.floor(ms / day);
-    // Remaining hours
     const hours = Math.floor((ms % day) / hour);
-    // Remaining minutes
     const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
     const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
     return { days, hours, minutes, seconds };
 }
 
+
+// Функция, которая использует метод метод padStart() 
+// и перед отрисовкой интефрейса форматируй значение.
 function addLeadingZero(value) {
     return String(value).padStart(2, '0');
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
